@@ -1,0 +1,1 @@
+A graph store built on Cloudflare Durable Objects with SQLite-backed storage, R2 file storage, and realtime WebSocket subscriptions. Single-user, multi-client architecture for bounded neighborhood queries over a property graph.

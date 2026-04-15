@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cf-graph",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-04-15",
+
+  "r2_buckets": [
+    {
+      "binding": "FILES_BUCKET",
+      "bucket_name": "cf-graph-files",
+      "preview_bucket_name": "cf-graph-files-preview"
+    }
+  ],
+
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "GRAPH_DO",
+        "class_name": "GraphDO"
+      }
+    ]
+  },
+
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["GraphDO"]
+    }
+  ]
+}
