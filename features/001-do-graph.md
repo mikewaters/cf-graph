@@ -45,16 +45,16 @@ The data model will evolve frequently. Since Cloudflare does not support `PRAGMA
 
 ### File Storage
 
-Files uploaded as part of graph mutations are stored in R2 per [ADR-3](./ADRs.md#adr-3-r2-for-large-payloads-presigned-url-uploads). The graph layer stores only a reference key, content type, size, and upload timestamp.
+Files uploaded as part of graph mutations are stored in R2 per [ADR-3](./ADRs.md#adr-3-r2-for-large-payloads-worker-proxied-uploads). The graph layer stores only a reference key, content type, size, and upload timestamp.
 
 The upload flow shall be:
 
-1. Client requests an upload URL from the Worker via HTTP.
-2. Worker generates a presigned R2 PUT URL with a scoped key and short expiry, and returns it to the client.
-3. Client uploads the file directly to R2 using the presigned URL.
-4. Client confirms the upload to the Worker, which creates or updates the corresponding node or edge reference in the graph transactionally.
+1. Client sends the file to the Worker via `PUT /files/:key`.
+2. Worker streams the request body to R2 via the binding.
+3. Worker returns the stored key, content type, and size.
+4. Client creates or updates the corresponding node or edge with the file reference in its properties.
 
-If the confirmation step fails, the client retries. Orphaned R2 objects (uploaded but never confirmed) may be cleaned up by R2 object lifecycle rules.[8]
+Files are subject to the 100MB Worker request body limit. Presigned URL uploads may be introduced later if larger files are needed (see ADR-3).[8]
 
 ### Query Model
 
@@ -211,7 +211,7 @@ The implementation shall be considered aligned with this specification when all 
 - The Durable Object can hibernate and later recover subscription routing state from WebSocket attachments without losing subscription identity.[7][6]
 - Mutations are accepted over HTTP and execute transactionally within the Durable Object.
 - Schema migrations run automatically on DO startup and can be iterated without manual intervention.[2]
-- Files are uploaded to R2 via presigned URLs and referenced in the graph by key; file content never passes through the Durable Object.[8]
+- Files are uploaded to R2 through the Worker and referenced in the graph by key; file content never enters the Durable Object.[8]
 
 Sources
 [1] Overview · Cloudflare Durable Objects docs https://developers.cloudflare.com/durable-objects/
