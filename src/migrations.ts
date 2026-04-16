@@ -44,6 +44,39 @@ export const migrations: Migration[] = [
     `,
   },
 
+  // Migration 2: materialized lookup tables for Concern↔Topic summaries
+  {
+    id: 2,
+    sql: `
+      CREATE TABLE IF NOT EXISTS concern_topic_summary (
+        concern_id TEXT NOT NULL REFERENCES nodes(id),
+        topic_id TEXT NOT NULL REFERENCES nodes(id),
+        score REAL NOT NULL DEFAULT 0.0,
+        resource_count INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (concern_id, topic_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_cts_concern ON concern_topic_summary(concern_id);
+      CREATE INDEX IF NOT EXISTS idx_cts_topic ON concern_topic_summary(topic_id);
+
+      CREATE TABLE IF NOT EXISTS topic_concern_summary (
+        topic_id TEXT NOT NULL REFERENCES nodes(id),
+        concern_id TEXT NOT NULL REFERENCES nodes(id),
+        concern_kind TEXT NOT NULL,
+        score REAL NOT NULL DEFAULT 0.0,
+        resource_count INTEGER NOT NULL DEFAULT 0,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (topic_id, concern_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_tcs_topic ON topic_concern_summary(topic_id);
+      CREATE INDEX IF NOT EXISTS idx_tcs_concern ON topic_concern_summary(concern_id);
+
+      INSERT INTO _sql_schema_migrations (id) VALUES (2);
+    `,
+  },
+
   // Add new migrations here. Each must end with:
   //   INSERT INTO _sql_schema_migrations (id) VALUES (N);
 ];
