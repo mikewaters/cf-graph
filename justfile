@@ -39,3 +39,22 @@ create-bucket:
 # Create the preview R2 bucket (run once, for local dev)
 create-preview-bucket:
     npx wrangler r2 bucket create cf-graph-files-preview
+
+# Run M1 integration tests (requires `just dev` running)
+test-m1:
+    bash tests/test-m1.sh
+
+# Run M2 integration tests
+test-m2:
+    bash tests/test-m2.sh
+
+# Run M3 integration tests
+test-m3:
+    bash tests/test-m3.sh
+
+# Run M4 integration tests
+test-m4:
+    bash tests/test-m4.sh
+
+# Run all integration tests
+test-all: test-m1 test-m2 test-m3 test-m4
